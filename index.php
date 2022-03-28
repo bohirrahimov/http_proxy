@@ -6,7 +6,7 @@ $url.= $_SERVER['REQUEST_URI'];
 $result = get_proxy_site_page($url);
 $headers = $result['header_size'] ;
 $result['content'] = substr($result['content'],$headers );
-$result["content"] = str_replace("https://news.ycombinator.com", $_SERVER['HTTP_HOST'], $result['content']);
+$result["content"] = str_replace("https://news.ycombinator.com", "/", $result['content']);
 $result["content"] = str_replace("news.css?U4Pc202vc5MEd4M0yfRK", "https://news.ycombinator.com/news.css?U4Pc202vc5MEd4M0yfRK", $result['content']);
 $result["content"] = str_replace("hn.js?U4Pc202vc5MEd4M0yfRK", "https://news.ycombinator.com/hn.js?U4Pc202vc5MEd4M0yfRK", $result['content']);
 $result["content"] = str_replace("<link rel=\"shortcut icon\" href=\"favicon.ico\">", "<link rel=\"shortcut icon\" href=\"https://news.ycombinator.com/favicon.ico\">", $result['content']);
@@ -14,7 +14,7 @@ $result["content"] = str_replace("<img src=\"y18.gif\" width=\"18\" height=\"18\
 
 $replacement = get_js();
 $start = strlen($result['content']) - 8;
-var_dump(http_response_code($result['http_code'])); 
+http_response_code($result['http_code']); 
 echo substr_replace($result['content'], $replacement,$start, 0);
 
 
@@ -47,7 +47,7 @@ function get_proxy_site_page($url)
 function get_js(){
     $code = "
     <script type=\"text/javascript\">
-    const tagnames = ['p','h1','h2','h3', 'h4', 'h5', 'h6','a'];
+    const tagnames = ['p','h1','h2','h3', 'h4', 'h5', 'h6','a', 'span'];
     let result = '';
     let list = [];
     let string = \"\";
@@ -59,7 +59,8 @@ function get_js(){
             let replacedWords = [];
             result = el.innerText;
             string = el.innerText;
-            result = result.replaceAll(/[^\w ]/g, \" \");
+            result = result.replaceAll(/[`~!@#$%^&*()_|+\-=?;:'\",.<>\{\}\[\]\\\/]/gi, ' ');
+            // result = result.replaceAll(/[^\w ]\"-.'’/g, \" \");
             list = result.split(\" \");
         list.map(word => {
             if(word.length === 6){
